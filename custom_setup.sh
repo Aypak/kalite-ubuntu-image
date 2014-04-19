@@ -25,6 +25,9 @@ dpkg -i ka-lite-3g-config_0.1_all.deb
 
 # setup the default user's desktop with KA Lite launching and SSH tunnel icons
 git clone https://github.com/fle-internal/kalite-ubuntu-image.git
+cd kalite-ubuntu-image
+git pull
+cd ..
 mkdir /etc/skel/Desktop
 cp kalite-ubuntu-image/icons/* /usr/share/icons/
 cp kalite-ubuntu-image/desktops/* /etc/skel/Desktop/
@@ -70,5 +73,21 @@ rm /var/www/ka-lite/kalite/database/data.sqlite
 chmod a+rw -R /var/www/ka-lite
 
 # don't require a password for sudo
-sudo perl -pi -e 's/%sudo ALL=\(ALL:ALL\) ALL/%sudo ALL=\(ALL:ALL\) NOPASSWD: ALL/g' /etc/sudoers
+perl -pi -e 's/sudo[ \t]+ALL=\(ALL:ALL\)[ \t]+ALL/sudo ALL=\(ALL:ALL\) NOPASSWD: ALL/g' /etc/sudoers
 
+# disable error reporting
+perl -pi -e 's/enabled=1/enabled=0/g' /etc/default/apport
+
+# set the desktop background
+gsettings set org.gnome.desktop.background picture-uri file:///usr/share/icons/fle-logo.png
+gsettings set org.gnome.desktop.background picture-options 'centered'
+gsettings set org.gnome.desktop.background primary-color '#336699'
+
+# disable screen lock
+gsettings set org.gnome.desktop.lockdown disable-lock-screen 'true'
+
+# copy settings over into the skeleton user
+cp -r ~/.config /etc/skel/
+
+# disable language warning
+rm -f /var/lib/update-notifier/user.d/incomplete*
