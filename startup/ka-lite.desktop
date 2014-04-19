@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Exec=/var/www/ka-lite/scripts/start.sh
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=Start KA Lite Server
+Comment=
