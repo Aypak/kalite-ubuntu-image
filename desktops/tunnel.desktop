@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Name=Create SSH tunnel
+Type=Application
+Terminal=true
+Icon=/usr/share/icons/tunnel.svg
+Exec=/usr/bin/python /var/www/ka-lite/kalite/manage.py createtunnel --traceback
