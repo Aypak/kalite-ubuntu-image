@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=True
+Icon=/usr/share/icons/kalite.png
+Name=Open KA Lite
+Exec=/usr/bin/sensible-browser http://127.0.0.1:8008
