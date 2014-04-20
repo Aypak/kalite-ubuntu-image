@@ -28,7 +28,7 @@ git clone https://github.com/fle-internal/kalite-ubuntu-image.git
 cd kalite-ubuntu-image
 git pull
 cd ..
-mkdir /etc/skel/Desktop
+mkdir -p /etc/skel/Desktop
 cp kalite-ubuntu-image/icons/* /usr/share/icons/
 cp kalite-ubuntu-image/desktops/* /etc/skel/Desktop/
 
@@ -39,6 +39,9 @@ chmod 755 /etc/skel/.config/autostart/*.desktop
 
 # add 3G dongle icons to default user's desktop
 git clone https://github.com/learningequality/3G-link.git
+cd 3G-link
+git pull
+cd ..
 cp 3G-link/src/*.desktop /etc/skel/Desktop/
 
 chmod 755 /etc/skel/Desktop/*.desktop
@@ -48,7 +51,7 @@ cat kalite-ubuntu-image/config/10periodic > /etc/apt/apt.conf.d/10periodic
 
 # Set up KA Lite
 
-mkdir /var/www
+mkdir -p /var/www
 cd /var/www
 git clone https://github.com/learningequality/ka-lite.git
 
@@ -57,6 +60,7 @@ read -p "Please enter the name of the branch to update from: " update_branch
 cd /var/www/ka-lite
 
 git checkout $update_branch
+git pull
 
 echo "GIT_UPDATE_BRANCH = '$update_branch'" >> /var/www/ka-lite/kalite/local_settings.py
 echo "INSTALL_ADMIN_USERNAME = 'admin'" >> /var/www/ka-lite/kalite/local_settings.py
@@ -86,8 +90,14 @@ gsettings set org.gnome.desktop.background primary-color '#336699'
 # disable screen lock
 gsettings set org.gnome.desktop.lockdown disable-lock-screen 'true'
 
+# auto-hide the launcher
+gsettings set org.compiz.unityshell:/org/compiz/profiles/unity/plugins/unityshell/ launcher-hide-mode 1
+
 # copy settings over into the skeleton user
 cp -r ~/.config /etc/skel/
+
+# create a shortcut to the video (content) folder inside KA Lite
+ln -s /var/www/ka-lite/content/ /etc/skel/Desktop/video\ folder
 
 # disable language warning
 rm -f /var/lib/update-notifier/user.d/incomplete*
