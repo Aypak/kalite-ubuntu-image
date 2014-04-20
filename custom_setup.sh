@@ -49,6 +49,12 @@ chmod 755 /etc/skel/Desktop/*.desktop
 # reduce bandwidth usage
 cat kalite-ubuntu-image/config/10periodic > /etc/apt/apt.conf.d/10periodic
 
+# initialize resolv.conf
+cat kalite-ubuntu-image/config/resolv.conf > /etc/resolv.conf
+
+# configure /etc/network/interfaces
+cat kalite-ubuntu-image/config/interfaces > /etc/network/interfaces
+
 # Set up KA Lite
 
 mkdir -p /var/www
