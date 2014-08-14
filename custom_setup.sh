@@ -6,7 +6,7 @@ echo "deb http://archive.ubuntu.com/ubuntu/ saucy-updates main restricted univer
 
 apt-get update
 
-apt-get install -y python-m2crypto ssh git python2.7 curl chromium-browser
+apt-get install -y python-m2crypto ssh git python2.7 curl chromium-browser libfribidi-bin
 
 apt-get remove -y firefox unity-lens-shopping unity-scope-video-remote unity-scope-musicstores
 
