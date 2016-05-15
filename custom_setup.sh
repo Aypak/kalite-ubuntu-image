@@ -24,18 +24,13 @@ curl -L https://github.com/learningequality/3G-link/releases/download/0.1/ka-lit
 dpkg -i ka-lite-3g-config_0.1_all.deb
 
 # setup the default user's desktop with KA Lite launching and SSH tunnel icons
-git clone https://github.com/fle-internal/kalite-ubuntu-image.git
+git clone https://github.com/Aypak/kalite-ubuntu-image.git
 cd kalite-ubuntu-image
 git pull
 cd ..
 mkdir -p /etc/skel/Desktop
 cp kalite-ubuntu-image/icons/* /usr/share/icons/
 cp kalite-ubuntu-image/desktops/* /etc/skel/Desktop/
-
-# set KA Lite to start up after a user logs in
-mkdir -p /etc/skel/.config/autostart/
-cp kalite-ubuntu-image/startup/* /etc/skel/.config/autostart/
-chmod 755 /etc/skel/.config/autostart/*.desktop
 
 # add 3G dongle icons to default user's desktop
 git clone https://github.com/learningequality/3G-link.git
@@ -56,31 +51,19 @@ cat kalite-ubuntu-image/config/resolv.conf > /etc/resolv.conf
 cat kalite-ubuntu-image/config/interfaces > /etc/network/interfaces
 
 # Set up KA Lite
+apt-get install libgtk2-perl ka-lite ka-lite-gtk 
 
-mkdir -p /var/www
-cd /var/www
-git clone https://github.com/learningequality/ka-lite.git
 
-read -p "Please enter the name of the branch to update from: " update_branch
+echo "INSTALL_ADMIN_USERNAME = 'admin'" >> ~/.kalite/settings.py
+echo "INSTALL_ADMIN_PASSWORD = 'edulution15'" >> ~/.kalite/settings.py
 
-cd /var/www/ka-lite
-
-git checkout $update_branch
-git pull
-
-echo "GIT_UPDATE_BRANCH = '$update_branch'" >> /var/www/ka-lite/kalite/local_settings.py
-echo "INSTALL_ADMIN_USERNAME = 'admin'" >> /var/www/ka-lite/kalite/local_settings.py
-read -p "Please enter a Django admin password: " admin_pass
-echo "INSTALL_ADMIN_PASSWORD = '$admin_pass'" >> /var/www/ka-lite/kalite/local_settings.py
-
-/var/www/ka-lite/kalite/manage.py setup --noinput
-/var/www/ka-lite/stop.sh
+kalite manage setup --noinput
 
 # delete the database so a fresh DB will be installed upon reboot
-rm /var/www/ka-lite/kalite/database/data.sqlite
+rm ~/.kalite/database/data.sqlite
 
 # make the KA Lite files and folders world read/writeable
-chmod a+rw -R /var/www/ka-lite
+chmod a+rw -R ~/.kalite
 
 # don't require a password for sudo
 perl -pi -e 's/sudo[ \t]+ALL=\(ALL:ALL\)[ \t]+ALL/sudo ALL=\(ALL:ALL\) NOPASSWD: ALL/g' /etc/sudoers
@@ -103,7 +86,14 @@ gsettings set org.compiz.unityshell:/org/compiz/profiles/unity/plugins/unityshel
 cp -r ~/.config /etc/skel/
 
 # create a shortcut to the video (content) folder inside KA Lite
-ln -s /var/www/ka-lite/content/ /etc/skel/Desktop/video\ folder
+ln -s ~/.kalite/content/ /etc/skel/Desktop/video\ folder
 
 # disable language warning
 rm -f /var/lib/update-notifier/user.d/incomplete*
+
+#bash aliases
+
+
+#ssh tunnel
+ssh-keygen -t dsa
+cat /home/edulution/.ssh/id_dsa.pub | ssh -l edulution 130.211.93.74 "[ -d ~/.ssh ] || mkdir -m 700 ~/.ssh; cat >> ~/.ssh/authorized_keys"
