@@ -1,0 +1,3 @@
+#!/bin/bash
+PYTHONPATH=/home/edulution/.kalite python /home/edulution/identify.py
+
