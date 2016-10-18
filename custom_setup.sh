@@ -1,43 +1,27 @@
-# include universe and multiverse in sources
-rm /etc/apt/sources.list
-echo "deb http://archive.ubuntu.com/ubuntu/ saucy main restricted universe multiverse" >> /etc/apt/sources.list
-echo "deb http://security.ubuntu.com/ubuntu/ saucy-security main restricted universe multiverse" >> /etc/apt/sources.list
-echo "deb http://archive.ubuntu.com/ubuntu/ saucy-updates main restricted universe multiverse" >> /etc/apt/sources.list
+# include ka-lite ppa in sources
+echo "deb http://ppa.launchpad.net/learningequality/ka-lite/ubuntu xenial main" >> /etc/apt/sources.list
 
-apt-get update
-
-apt-get install -y python-m2crypto ssh git python2.7 curl chromium-browser libfribidi-bin
-
+#remove unecessary packages
 apt-get remove -y firefox unity-lens-shopping unity-scope-video-remote unity-scope-musicstores
-
 apt-get purge -y ubuntuone-*
 
-cd /tmp
+#install relevant packages and ka-lite
+sudo apt-get update
+apt-get install -y libgtk2-perl python-m2crypto ssh git python2.7 curl chromium-browser libfribidi-bin software-properties-common python-software-properties 
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3194DD81
+sudo apt-get install ka-lite-raspberry-pi
 
-# install the Wifi Hotspot
-apt-get install -y dnsmasq hostapd
-curl -L https://github.com/learningequality/ka-lite-hotspot/releases/download/0.1/ka-lite-hotspot_0.1_all.deb -o ka-lite-hotspot_0.1_all.deb
-dpkg -i ka-lite-hotspot_0.1_all.deb
 
-# install the 3G dongle scripts
-curl -L https://github.com/learningequality/3G-link/releases/download/0.1/ka-lite-3g-config_0.1_all.deb -o ka-lite-3g-config_0.1_all.deb
-dpkg -i ka-lite-3g-config_0.1_all.deb
 
 # setup the default user's desktop with KA Lite launching and SSH tunnel icons
 git clone https://github.com/Aypak/kalite-ubuntu-image.git
 cd kalite-ubuntu-image
 git pull
-cd ..
+
 mkdir -p /etc/skel/Desktop
 cp kalite-ubuntu-image/icons/* /usr/share/icons/
 cp kalite-ubuntu-image/desktops/* /etc/skel/Desktop/
 
-# add 3G dongle icons to default user's desktop
-git clone https://github.com/learningequality/3G-link.git
-cd 3G-link
-git pull
-cd ..
-cp 3G-link/src/*.desktop /etc/skel/Desktop/
 
 chmod 755 /etc/skel/Desktop/*.desktop
 
@@ -47,16 +31,24 @@ cat kalite-ubuntu-image/config/10periodic > /etc/apt/apt.conf.d/10periodic
 # initialize resolv.conf
 cat kalite-ubuntu-image/config/resolv.conf > /etc/resolv.conf
 
+# configure nginx
+sudo rm /etc/nginx/nginx.conf
+sudo cp kalite-ubuntu-image/config/nginx.conf > /etc/nginx/
+
+sudo rm /etc/nginx/sites-enabled/kalite.conf
+sudo cp kalite-ubuntu-image/config/kalite.conf > /etc/nginx/sites-enabled/
+
 # configure /etc/network/interfaces
 cat kalite-ubuntu-image/config/interfaces > /etc/network/interfaces
 
 # Set up KA Lite
-apt-get install libgtk2-perl ka-lite ka-lite-gtk 
-
-
 echo "INSTALL_ADMIN_USERNAME = 'admin'" >> ~/.kalite/settings.py
 echo "INSTALL_ADMIN_PASSWORD = 'edulution15'" >> ~/.kalite/settings.py
-
+echo "LOCKDOWN = True" >> ~/.kalite/settings.py
+echo "SIMPLIFIED_LOGIN = True" >> ~/.kalite/settings.py
+echo "DISABLE_SELF_ADMIN = True" >> ~/.kalite/settings.py
+echo "SYNCING_MAX_RECORDS_PER_REQUEST = 1000" >> ~/.kalite/settings.py
+echo "USER_LOG_SUMMARY_FREQUENCY = (1,"months")" >> ~/.kalite/settings.py
 kalite manage setup --noinput
 
 # delete the database so a fresh DB will be installed upon reboot
@@ -79,9 +71,6 @@ gsettings set org.gnome.desktop.background primary-color '#336699'
 # disable screen lock
 gsettings set org.gnome.desktop.lockdown disable-lock-screen 'true'
 
-# auto-hide the launcher
-gsettings set org.compiz.unityshell:/org/compiz/profiles/unity/plugins/unityshell/ launcher-hide-mode 1
-
 # copy settings over into the skeleton user
 cp -r ~/.config /etc/skel/
 
@@ -92,8 +81,11 @@ ln -s ~/.kalite/content/ /etc/skel/Desktop/video\ folder
 rm -f /var/lib/update-notifier/user.d/incomplete*
 
 #bash aliases
+echo "alias sync="kalite manage syncmodels"" >> ~/.bash_aliases
+echo "alias restartka="sudo service ka-lite restart"" >> ~/.bash_aliases
+echo "alias whoru="~/whoru"" >> ~/.bash_aliases
 
-
-#ssh tunnel
+# configure ssh tunnel
 ssh-keygen -t dsa
-cat /home/edulution/.ssh/id_dsa.pub | ssh -l edulution 130.211.93.74 "[ -d ~/.ssh ] || mkdir -m 700 ~/.ssh; cat >> ~/.ssh/authorized_keys"
+cat /home/pi/.ssh/id_dsa.pub | ssh -l edulution 130.211.93.74 "[ -d /home/edulution/.ssh ] || mkdir -m 700 /home/edulution/.ssh; cat >> /home/edulution/.ssh/authorized_keys"
+
